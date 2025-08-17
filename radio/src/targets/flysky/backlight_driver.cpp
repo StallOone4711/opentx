@@ -60,13 +60,22 @@ void backlightEnable(uint8_t level)
   } else {
     GPIO_ResetBits(BACKLIGHT_STD_GPIO, BACKLIGHT_STD_GPIO_PIN);
   }
+
+  /**
+   * Ensure the pwm is disabled when the level is >= 100 which means the backlight is off.
+   * Solves the issue of residual brightness when the backlight is controlled via a global function (poti).
+   */
+    if (level >= 100)
+  {
+    backlightDisable();
+  }
 }
 
 void backlightDisable()
 {
   BACKLIGHT_COUNTER_REGISTER = 100;
   BACKLIGHT_TIMER->CR1 &= ~TIM_CR1_CEN;          // solves very dim light with backlight off
-
+  
   // std
   GPIO_ResetBits(BACKLIGHT_STD_GPIO, BACKLIGHT_STD_GPIO_PIN);
 }
